@@ -1,0 +1,10 @@
+{
+  "name": "Puzzl — Puzzle Solver",
+  "short_name": "Puzzl",
+  "description": "Solve number, picture, and logic-grid puzzles with verified hints.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f5f0",
+  "theme_color": "#f6f5f0",
+  "icons": [{"src":"/assets/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]
+}

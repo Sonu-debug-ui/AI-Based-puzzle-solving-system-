@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5f0">
+  <meta name="description" content="A calm puzzle solver for Sudoku, KenKen, Killer Sudoku, Nonograms, and logic grids.">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <title>Puzzl — a better kind of hint</title>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Puzzl home"><span class="brand-mark" aria-hidden="true">p.</span><span>puzzl</span></a>
+    <nav aria-label="Main navigation"><a class="nav-current" href="#solver">The solver</a><a href="#how-it-works">How it works</a></nav>
+    <div class="topbar-end"><span class="privacy-pill"><span class="privacy-dot"></span>Private by design</span><button id="installButton" class="install-button" hidden>Install app</button></div>
+  </header>
+
+  <main>
+    <section class="intro" id="solver">
+      <div class="intro-copy">
+        <div class="eyebrow"><span class="eyebrow-line"></span>YOUR NEXT GOOD MOVE</div>
+        <h1>A hint that<br><em>keeps you</em> solving.</h1>
+        <p class="intro-text">Get unstuck without giving the whole game away. Every answer is checked against the rules, every step is yours to make.</p>
+      </div>
+      <div class="intro-note" aria-label="Product promise">
+        <span class="note-icon" aria-hidden="true">✳</span>
+        <p>Thoughtful help,<br><strong>never a guess.</strong></p>
+      </div>
+    </section>
+
+    <section class="workspace" aria-label="Puzzle solver">
+      <aside class="rail">
+        <div class="rail-heading"><span class="step-number">01</span><span>YOUR PUZZLE</span></div>
+        <h2>Start with<br>your grid.</h2>
+        <p class="rail-copy">Type in the clues, paste a grid, or bring in a photo to work from.</p>
+        <label class="mode-label" for="puzzleType">Puzzle type</label>
+        <select id="puzzleType" class="mode-select">
+          <option value="sudoku">Sudoku</option>
+          <option value="kenken">KenKen</option>
+          <option value="killer_sudoku">Killer Sudoku</option>
+          <option value="nonogram">Nonogram</option>
+          <option value="logic_grid">Logic grid</option>
+          <option value="chess">Chess analysis</option>
+          <option value="cube">Rubik’s Cube</option>
+        </select>
+
+        <div id="sudokuControls">
+        <div class="input-actions">
+          <button class="action-card" id="photoButton" type="button">
+            <span class="action-icon photo-icon" aria-hidden="true">↥</span><span><strong>Add a photo</strong><small>Image stays on this device</small></span><span class="action-arrow" aria-hidden="true">↗</span>
+          </button>
+          <button class="action-card" id="screenButton" type="button">
+            <span class="action-icon photo-icon" aria-hidden="true">▣</span><span><strong>Share a screen</strong><small>Capture a visible puzzle window</small></span><span class="action-arrow" aria-hidden="true">↗</span>
+          </button>
+          <input id="photoInput" type="file" accept="image/*" capture="environment" hidden>
+          <label class="paste-label" for="pasteGrid">Or paste 81 digits <span>↘</span></label>
+          <textarea id="pasteGrid" class="paste-grid" rows="2" maxlength="81" aria-label="Paste an 81-character Sudoku grid" placeholder="e.g. 530070000…"></textarea>
+          <button class="text-button" id="loadPaste" type="button">Load pasted grid <span>→</span></button>
+        </div>
+
+        <div class="rail-divider"></div>
+        <div class="sample-row"><div><strong>Want to try one?</strong><span>A gentle starter puzzle</span></div><button id="sampleButton" class="sample-button" type="button" aria-label="Load sample Sudoku">↗</button></div>
+        <button id="clearButton" class="clear-button" type="button">Clear the board</button>
+        </div>
+        <div class="rail-divider"></div>
+        <div class="history-heading"><div><strong>Your saved puzzles</strong><span>Stored by the local app</span></div><button id="savePuzzle" class="text-button" type="button">Save current</button></div>
+        <ul id="historyList" class="history-list" aria-label="Saved puzzles"><li class="history-empty">No saved puzzles yet.</li></ul>
+      </aside>
+
+      <div class="board-area">
+        <div class="board-toolbar">
+          <div class="board-title"><div class="live-indicator"></div><span id="boardTypeLabel">Sudoku</span><span id="boardSizeLabel" class="board-tag">9 × 9</span></div>
+          <div class="toolbar-right"><span class="keyboard-hint"><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> to move</span><button id="clearHighlights" class="icon-button" type="button" title="Clear highlights" aria-label="Clear highlights">↺</button></div>
+        </div>
+        <div id="sudokuDisplay">
+          <div class="board-shell">
+            <div id="sudokuBoard" class="sudoku-board" role="group" aria-label="Editable Sudoku grid"></div>
+            <div id="boardOverlay" class="board-overlay" hidden></div>
+          </div>
+          <div class="board-caption"><span><span class="legend-dot given-dot"></span> Your clues</span><span><span class="legend-dot answer-dot"></span> Verified values</span><span id="eliminationLegend" hidden><span class="legend-dot elimination-dot"></span> Candidate removals</span><span class="caption-right">Click any cell to edit</span></div>
+        </div>
+        <section id="structuredMode" class="structured-mode" hidden aria-label="Structured puzzle input">
+          <p id="structuredHelp">Enter a puzzle state as JSON. The solver checks its format and every solution against the puzzle rules.</p>
+          <button id="toggleStructuredJson" class="text-button advanced-json-toggle" type="button" hidden>Show advanced JSON</button>
+          <div id="structuredJsonTools">
+            <label for="structuredInput">Puzzle state JSON</label>
+            <textarea id="structuredInput" rows="15" spellcheck="false" aria-describedby="structuredHelp"></textarea>
+            <button id="loadStructured" class="primary-button" type="button">Load this puzzle <span aria-hidden="true">↗</span></button>
+          </div>
+          <div id="nonogramEditor" class="nonogram-editor" hidden>
+            <div class="rail-divider"></div>
+            <p>Enter one clue line per row or column. Separate run lengths with spaces or commas; leave a line blank for an empty row or column.</p>
+            <label for="nonogramRows">Row clues</label>
+            <textarea id="nonogramRows" rows="5" spellcheck="false" placeholder="1&#10;3&#10;5&#10;3&#10;1"></textarea>
+            <label for="nonogramColumns">Column clues</label>
+            <textarea id="nonogramColumns" rows="5" spellcheck="false" placeholder="1&#10;3&#10;5&#10;3&#10;1"></textarea>
+            <button id="loadNonogramClues" class="secondary-button" type="button">Load clue lines →</button>
+            <div id="nonogramResultGrid" class="nonogram-result-grid" hidden role="grid" aria-label="Verified Nonogram solution"></div>
+          </div>
+          <div id="cageEditor" class="cage-editor" hidden>
+            <div class="rail-divider"></div>
+            <p id="cageEditorIntro">Build connected arithmetic cages by selecting neighboring cells.</p>
+            <label for="cageEditorSize">Grid size</label>
+            <select id="cageEditorSize" class="mode-select" aria-label="Cage puzzle grid size"></select>
+            <label for="cageEditorGivens">Given values, row by row (0 means empty)</label>
+            <input id="cageEditorGivens" class="cage-givens" type="text" maxlength="81" spellcheck="false">
+            <div id="cageEditorGrid" class="cage-editor-grid" role="grid" aria-label="Cage puzzle cells"></div>
+            <div class="cage-editor-controls">
+              <label for="cageTarget">Cage target</label><input id="cageTarget" type="number" min="1" max="1000000000" value="3">
+              <label id="cageOperationLabel" for="cageOperation">Operation</label>
+              <select id="cageOperation" class="mode-select"><option value="+">+ Sum</option><option value="×">× Product</option><option value="−">− Difference</option><option value="÷">÷ Quotient</option><option value="=">= Exact value</option></select>
+            </div>
+            <div class="cage-editor-actions"><button id="addCage" class="secondary-button" type="button">Add selected cage</button><button id="undoCage" class="text-button" type="button">Undo last cage</button><button id="clearCages" class="text-button" type="button">Clear all cages</button></div>
+            <p id="cageEditorStatus" class="privacy-note" aria-live="polite"></p>
+            <button id="loadCagePuzzle" class="primary-button" type="button">Load cage puzzle <span aria-hidden="true">↗</span></button>
+          </div>
+          <div id="logicParsePanel" hidden>
+            <div class="rail-divider"></div>
+            <p>Build a logic grid from categories and explicit relationships. Each category needs one value per position. If you enter source clues below, map every relationship back to its clue before loading.</p>
+            <label class="position-label" for="logicPositions">Positions</label>
+            <input id="logicPositions" type="number" min="2" max="7" value="2">
+            <label for="logicCategoryLines">Category values (one category per line)</label>
+            <textarea id="logicCategoryLines" rows="4" spellcheck="false" placeholder="Person: Ada, Ben&#10;Drink: Tea, Coffee&#10;Pet: Cat, Dog"></textarea>
+            <button id="prepareLogicRelations" class="secondary-button" type="button">Prepare relationship builder →</button>
+            <div id="logicRelationBuilder" class="logic-relation-builder" hidden>
+              <div class="logic-entity-fields">
+                <fieldset>
+                  <legend>First entity</legend>
+                  <label for="logicLeftCategory">Category</label><select id="logicLeftCategory" class="mode-select"></select>
+                  <label for="logicLeftValue">Value</label><select id="logicLeftValue" class="mode-select"></select>
+                </fieldset>
+                <fieldset id="logicRightEntity">
+                  <legend>Second entity</legend>
+                  <label for="logicRightCategory">Category</label><select id="logicRightCategory" class="mode-select"></select>
+                  <label for="logicRightValue">Value</label><select id="logicRightValue" class="mode-select"></select>
+                </fieldset>
+              </div>
+              <label for="logicRelationKind">Relationship</label>
+              <select id="logicRelationKind" class="mode-select">
+                <option value="same">is matched with</option><option value="different">is not matched with</option>
+                <option value="left_of">is somewhere before</option><option value="next_to">is next to</option>
+                <option value="immediately_left">is immediately before</option><option value="at_position">is at position</option>
+                <option value="not_position">is not at position</option>
+              </select>
+              <div id="logicSourceClueBlock" hidden><label for="logicRelationSourceClue">Source clue this relationship represents</label><select id="logicRelationSourceClue" class="mode-select"></select></div>
+              <div id="logicPositionBlock" hidden><label for="logicRelationPosition">Position number</label><input id="logicRelationPosition" type="number" min="1" max="7" value="1"></div>
+              <label for="logicRelationExplanation">Clue or note (optional)</label>
+              <input id="logicRelationExplanation" type="text" maxlength="240" placeholder="Add a short explanation">
+              <button id="addLogicRelation" class="secondary-button" type="button">Add relationship</button>
+              <ul id="logicConstraintList" class="logic-review" aria-label="Relationships in this puzzle"></ul>
+              <button id="loadLogicRelations" class="primary-button" type="button">Load logic grid <span aria-hidden="true">↗</span></button>
+            </div>
+            <div class="rail-divider"></div>
+            <p>Or interpret written clues with AI. Review every mapping before loading it.</p>
+            <label for="logicCategories">Categories and entries (JSON)</label>
+            <textarea id="logicCategories" rows="5" spellcheck="false" placeholder='{"Person":["Ada","Ben"],"Drink":["Tea","Coffee"]}'></textarea>
+            <label for="logicClues">One clue per line</label>
+            <textarea id="logicClues" rows="5" placeholder="Ada drinks tea."></textarea>
+            <button id="parseLogic" class="secondary-button" type="button">Interpret typed clues with AI →</button>
+            <p class="privacy-note">This sends only the typed clues and category names to the configured Claude API. Review the structured clues before loading them.</p>
+            <ul id="logicReview" class="logic-review" aria-label="Parsed clue mappings" hidden></ul>
+          </div>
+          <div id="chessPanel" hidden>
+            <div class="rail-divider"></div>
+            <div class="chess-fen-section">
+              <label for="chessFenInput">FEN position</label>
+              <div class="chess-fen-bar">
+                <input id="chessFenInput" class="paste-grid" type="text" spellcheck="false" placeholder="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1">
+                <button id="loadChessFen" class="secondary-button" type="button">Load FEN →</button>
+              </div>
+            </div>
+            <div class="chess-capture-actions">
+              <button class="action-card" id="chessPhotoButton" type="button">
+                <span class="action-icon photo-icon" aria-hidden="true">↥</span>
+                <span><strong>Add chess photo</strong><small>Recognize 8 × 8 board</small></span>
+                <span class="action-arrow" aria-hidden="true">↗</span>
+              </button>
+              <button class="action-card" id="chessScreenButton" type="button">
+                <span class="action-icon photo-icon" aria-hidden="true">▣</span>
+                <span><strong>Share chess window</strong><small>Capture live screen</small></span>
+                <span class="action-arrow" aria-hidden="true">↗</span>
+              </button>
+              <input id="chessPhotoInput" type="file" accept="image/*" capture="environment" hidden>
+            </div>
+            <label for="chessMode">Analysis context</label>
+            <select id="chessMode" class="mode-select"><option value="puzzle">Puzzle</option><option value="finished_game">Finished game</option><option value="bot_game">Bot game</option></select>
+            <label class="fair-play-label"><input id="fairPlayConfirmed" type="checkbox"> I confirm this is a puzzle, a finished game, or a bot game.</label>
+            <p class="privacy-note">Suggestions are disabled until you confirm. Never use them against a live opponent. Click any square to cycle pieces or use the FEN field above.</p>
+            <div class="chess-board-toolbar">
+              <span class="keyboard-hint">Click a square to edit · Arrows navigate</span>
+              <div>
+                <button id="resetChessStart" class="text-button" type="button">Start position</button> · 
+                <button id="clearChessBoard" class="text-button" type="button">Clear board</button>
+              </div>
+            </div>
+            <div id="chessBoardPreview" class="chess-board-preview" role="grid" aria-label="Chess position preview"></div>
+            <div id="chessPvControls" class="chess-pv-controls" hidden aria-label="Suggested move line replay">
+              <div class="chess-pv-header"><strong>Suggested Line:</strong> <span id="chessPvText"></span></div>
+              <div class="chess-pv-buttons">
+                <button id="chessPvPrev" class="secondary-button" type="button">← Prev move</button>
+                <button id="chessPvNext" class="secondary-button" type="button">Next move →</button>
+                <button id="chessPvReset" class="text-button" type="button">Reset position</button>
+              </div>
+            </div>
+          </div>
+          <div id="cubePanel" hidden>
+            <div class="rail-divider"></div>
+            <button id="cubeCameraStart" class="secondary-button" type="button">Scan six faces with camera →</button>
+            <div id="cubeCameraPanel" class="cube-camera-panel" hidden>
+              <div class="cube-camera-live"><span aria-hidden="true"></span>CAMERA ACTIVE · PROCESSED LOCALLY</div>
+              <p id="cubeScanInstruction" aria-live="polite">Allow camera access, then follow the face orientation guide.</p>
+              <div class="cube-camera-frame"><video id="cubeCameraVideo" autoplay muted playsinline aria-label="Live Rubik’s Cube camera view"></video><div class="cube-camera-grid" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+              <div class="cube-camera-controls"><button id="cubeCaptureFace" class="primary-button" type="button">Capture this face</button><button id="cubeCancelScan" class="text-button" type="button">Cancel</button></div>
+              <p class="privacy-note">Camera frames are sampled locally and discarded after each face. Keep the full face inside the guide and avoid glare.</p>
+            </div>
+            <label for="cubeFacelets">54 stickers in URFDLB order</label>
+            <textarea id="cubeFacelets" rows="3" maxlength="54" spellcheck="false" aria-describedby="cubePrivacy"></textarea>
+            <button id="loadCubeFacelets" class="secondary-button" type="button">Load sticker state →</button>
+            <div id="cubeColorConfirmation" class="cube-color-confirmation" hidden aria-label="Confirm sampled cube sticker colors"></div>
+            <p id="cubePrivacy" class="privacy-note">Stickers are checked for count, orientation, and parity, then solved in a browser worker. No cube state or camera frame goes to the server.</p>
+          </div>
+        </section>
+        <section id="cubeReplay" class="cube-replay" hidden aria-label="Cube solution replay">
+          <div class="cube-scene" aria-label="Three-dimensional cube preview">
+            <div id="cube3d" class="cube3d" role="img" aria-label="Rubik’s Cube at the current solution step">
+              <div class="cube-face cube-front" data-face="F"></div><div class="cube-face cube-back" data-face="B"></div>
+              <div class="cube-face cube-right" data-face="R"></div><div class="cube-face cube-left" data-face="L"></div>
+              <div class="cube-face cube-top" data-face="U"></div><div class="cube-face cube-bottom" data-face="D"></div>
+            </div>
+          </div>
+          <div id="cubeStepLabel" class="cube-step-label">Enter a sticker state to start.</div>
+          <div class="cube-replay-controls"><button id="cubePrevious" type="button" disabled>← Previous</button><button id="cubeNext" type="button" disabled>Next →</button></div>
+          <ol id="cubeMoveList" class="cube-move-list" aria-label="Solution moves"></ol>
+        </section>
+      </div>
+
+      <aside class="help-panel">
+        <div class="rail-heading"><span class="step-number">02</span><span>HOW MUCH HELP?</span></div>
+        <h2>You’re in<br>control.</h2>
+        <p class="rail-copy">Start small. Ask for more whenever you’re ready.</p>
+        <div class="help-levels" role="group" aria-label="Choose hint level">
+          <button class="help-level selected" data-level="nudge" type="button"><span class="level-radio"></span><span><strong>A nudge</strong><small>Point me in a direction</small></span><span class="level-index">1</span></button>
+          <button class="help-level" data-level="hint" type="button"><span class="level-radio"></span><span><strong>A hint</strong><small>Show the logic</small></span><span class="level-index">2</span></button>
+          <button class="help-level" data-level="answer" type="button"><span class="level-radio"></span><span><strong>The answer</strong><small>Reveal one value</small></span><span class="level-index">3</span></button>
+        </div>
+        <div id="aiExplanationControl" class="ai-explanation-control" hidden><label><input id="useAiExplanation" type="checkbox"> Send this verified hint to AI for clearer wording</label><p class="privacy-note">Only the deduction and mapped source clue text, if present, are sent to Anthropic. No image or full puzzle grid is sent.</p></div>
+        <button id="hintButton" class="primary-button" type="button"><span>Get a nudge</span><span aria-hidden="true">↗</span></button>
+        <button id="solveButton" class="secondary-button" type="button">Check the whole puzzle <span aria-hidden="true">→</span></button>
+        <div class="status-card" id="statusCard" aria-live="polite" aria-atomic="true">
+          <div class="status-empty"><span class="status-sparkle">✳</span><span>Your next step will show up here.</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <section id="photoPanel" class="photo-panel" hidden aria-live="polite">
+      <div class="photo-preview-wrap"><canvas id="photoCanvas" aria-label="Photo crop area. Drag to select the Sudoku grid."></canvas><button id="removePhoto" class="remove-photo" type="button" aria-label="Remove selected photo">×</button></div>
+      <div class="photo-copy"><div class="eyebrow">ON-DEVICE RECOGNITION</div><div id="screenCaptureIndicator" class="screen-capture-indicator" hidden><span></span>SCREEN CAPTURE ACTIVE · PROCESSED LOCALLY</div><h2>Frame the grid.<br>We’ll read the clues.</h2><p>Upload a photo or share your screen, then drag a box around the 9 × 9 grid or ask for a corner suggestion. For angled photos, mark the four corners manually. Image processing stays in this browser; review the highlighted clues before asking for help.</p><div class="photo-correction-tools"><button id="autoDetectCorners" class="text-button" type="button" hidden>Auto-detect grid corners</button><button id="suggestPhotoCorners" class="text-button" type="button" hidden>Suggest grid corners</button><button id="cropModeToggle" class="text-button" type="button">Use four-corner correction →</button><button id="resetPhotoCorners" class="text-button" type="button" hidden>Reset corners</button><p id="photoCornerInstructions" hidden aria-live="polite">Click the grid corners clockwise, starting at the top-left.</p></div><div id="screenCropMemory" class="screen-crop-memory" hidden><label for="screenSiteName">Remember this crop for</label><input id="screenSiteName" type="text" maxlength="120" placeholder="Site label, e.g. lichess.org"><label class="remember-crop-label"><input id="rememberScreenCrop" type="checkbox"> Save the crop on this device</label><small>Only the site label and crop coordinates are saved; screen images are never stored.</small></div><div class="recognition-metrics-optin"><label><input id="collectRecognitionMetrics" type="checkbox" aria-describedby="recognitionMetricsHelp"> Share anonymous recognition measurements with this server</label><small id="recognitionMetricsHelp">After each attempt, only processing times and cell counts are sent; edits are counted after confirmation. No image, grid values, or clue text is sent.</small></div><div class="photo-controls"><button id="recognizePhoto" class="primary-button" type="button" disabled>Recognize this grid <span aria-hidden="true">↗</span></button><button id="stopScreenShare" class="text-button" type="button" hidden>Stop screen sharing</button><button id="dismissPhoto" class="text-button" type="button">Enter it myself <span>→</span></button></div></div>
+    </section>
+
+    <section class="how-section" id="how-it-works">
+      <div class="how-heading"><div class="eyebrow"><span class="eyebrow-line"></span>A LITTLE MORE HUMAN</div><h2>Three steps.<br><em>One less spoiler.</em></h2></div>
+      <div class="how-steps">
+        <article><span class="how-num">01</span><h3>Bring your puzzle</h3><p>Type the givens or paste a grid. Your clues stay editable, so you’re always the one in charge.</p></article>
+        <article><span class="how-num">02</span><h3>Pick your kind of help</h3><p>A gentle nudge, a technique and its logic, or one verified value. The full solution is always your choice.</p></article>
+        <article><span class="how-num">03</span><h3>Keep the aha</h3><p>A deterministic solver checks every answer. If a clue conflicts, we show you where the grid disagrees.</p></article>
+      </div>
+    </section>
+  </main>
+
+  <footer><a class="brand footer-brand" href="/" aria-label="Puzzl home"><span class="brand-mark" aria-hidden="true">p.</span><span>puzzl</span></a><span>Made for the moment you almost had it.</span><span class="footer-privacy">No puzzle photos leave your device.</span></footer>
+  <script src="/vendor/cubejs/cube.js" defer></script>
+  <script src="/app.js" defer></script>
+</body>
+</html>
