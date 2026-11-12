@@ -3066,3 +3066,7 @@ fetch("/health").then((response) => response.ok ? response.json() : null).then((
 
 buildBoard();
 loadHistory();
+const initialPuzzle = new URLSearchParams(window.location.search).get("puzzle");
+if (initialPuzzle && ["sudoku", "kenken", "killer_sudoku", "nonogram", "logic_grid", "chess", "cube"].includes(initialPuzzle)) {
+  setPuzzleType(initialPuzzle);
+}

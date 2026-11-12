@@ -30,6 +30,36 @@ Unlike generic LLM wrappers that guess grid solutions, **Puzzl enforces strict m
 
 ---
 
+## Interface Preview
+
+<p align="center">
+  <img src="web/assets/screenshots/sudoku_interface.png" alt="Sudoku Interface & Deduction Engine" width="920" />
+</p>
+
+<table align="center" width="100%">
+  <tr>
+    <td align="center" width="50%">
+      <img src="web/assets/screenshots/chess_interface.png" alt="Chess Recognition & Engine Analysis" />
+      <br />
+      <em><strong>Chess Analysis</strong> — Board vision, legal move generator, move continuity guard & alpha-beta evaluation</em>
+    </td>
+    <td align="center" width="50%">
+      <img src="web/assets/screenshots/cube_interface.png" alt="Rubik's Cube 3D Solver" />
+      <br />
+      <em><strong>Rubik's Cube</strong> — Two-phase Kociemba solver with step-by-step 3D playback in a Web Worker</em>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2">
+      <img src="web/assets/screenshots/logic_interface.png" alt="Logic Grid & Clue Interpreter" width="850" />
+      <br />
+      <em><strong>Logic Grid & AI Clue Interpreter</strong> — Natural language parsing into formal relational constraints</em>
+    </td>
+  </tr>
+</table>
+
+---
+
 ## Architecture
 
 ```mermaid
@@ -230,11 +260,28 @@ AI-Based PSS/
 │   └── test_solvers.py        # 40-case comprehensive test suite
 └── web/
     ├── app.js                 # PWA frontend, local canvas CV & UI logic
+    ├── assets/
+    │   ├── icon.svg           # Application brand icon
+    │   └── screenshots/       # High-resolution UI preview captures
     ├── cube-worker.js         # Dedicated Web Worker for 3D cube solving
     ├── index.html             # Accessible, responsive interface
     ├── styles.css             # High-contrast, clean UI styling
     └── vendor/cubejs/         # Local Two-Phase Kociemba solver
 ```
+
+---
+
+## Roadmap & Future Enhancements
+
+The following roadmap items represent impactful next steps to expand Puzzl's capabilities:
+
+- [ ] **On-Device ML via ONNX Runtime Web / WebGPU:** Replace canvas pixel heuristics with small, quantized on-device models running via WASM/WebGPU to recognize handwritten digits and physical chess piece sets with zero network latency.
+- [ ] **Real-Time Augmented Reality (AR) Overlay:** Project step hints and pencilmark overlays directly onto the user's live video feed using homography matrix tracking.
+- [ ] **Nikoli Puzzle Expansion:** Extend the exact propagation and search solver to classic Japanese pencil puzzles like **Slitherlink**, **Nurikabe**, **Kakuro**, and **Hashiwokakero (Bridges)**.
+- [ ] **Interactive "Puzzle Coach" Drills:** Practice modes where users are challenged to spot specific techniques (e.g. *"Find the XY-Wing in this position"* or *"Spot the Tactical Pin"*) before hints are revealed.
+- [ ] **WebAssembly Stockfish Engine:** Upgrade the chess analysis engine to a multi-threaded WebAssembly build of Stockfish 16+ with Polyglot opening books and Syzygy endgame tablebases.
+- [ ] **Shareable Solution Links (Zero-Server State):** Compress puzzle states and stepped solutions into URL hash fragments (`#state=...`) for instant sharing without accounts.
+- [ ] **Cross-Platform Desktop & Mobile Packaging:** Package the PWA via Tauri or Capacitor for native offline distribution on Windows, macOS, Android, and iOS.
 
 ---
 
